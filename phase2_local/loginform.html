@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Apple Login Demo (Option B)</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <h2>Apple Login (Separate Frontend + Backend)</h2>
+
+  <form id="loginForm">
+    <label>Apple ID: <input type="text" id="apple_id" required></label><br><br>
+    <label>Password: <input type="password" id="password" required></label><br><br>
+    <button type="submit">Login</button>
+  </form>
+
+  <form id="otpForm" class="hidden">
+    <label>OTP: <input type="text" id="otp" required></label><br><br>
+    <button type="submit">Verify OTP</button>
+  </form>
+
+  <p id="result"></p>
+
+  <script>
+    const loginForm = document.getElementById("loginForm");
+    const otpForm = document.getElementById("otpForm");
+    const result = document.getElementById("result");
+
+    loginForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const apple_id = document.getElementById("apple_id").value;
+      const password = document.getElementById("password").value;
+
+      const res = await fetch("http://127.0.0.1:5000/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ apple_id, password })
+      });
+      const data = await res.json();
+
+      if (data.status === "otp_required") {
+        result.innerText = "OTP required. Please enter it.";
+        otpForm.classList.remove("hidden");
+      } else if (data.status === "login_failed") {
+        result.innerText = "Login failed: " + data.error;
+      } else {
+        result.innerText = "Login success!";
+      }
+    };
+
+    otpForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const otp = document.getElementById("otp").value;
+      result.innerText = "OTP submitted: " + otp + " (placeholder)";
+    };
+  </script>
+</body>
+</html>
